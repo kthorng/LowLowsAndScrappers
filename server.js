@@ -28,7 +28,23 @@ app.get("/scrape", function(req, res) {
         $("").each(function(i, element) {
             var result = {};
 
-            
-        })
-    })
+            result.title = $(this)
+            .children("a").text();
+            result.line = $(this)
+            .children("a").attr("href");
+
+            db.Article.create(result).then(function(dbArticle) {
+                console.log(dbArticle);
+            })
+            .catch(function(err) {
+                console.log(err);
+            });
+        });
+        res.send("Scrape Complete");
+    });
+});
+
+// Server Start
+app.listen(PORT, function() {
+    console.log("Server listening on: http://localhost:" + PORT + "!")
 })
