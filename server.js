@@ -23,9 +23,9 @@ app.use(express.static("public"));
 mongoose.connect(MONGODB_URI);
 
 app.get("/scrape", function(req, res) {
-    axios.get("").then(function(res) {
+    axios.get("https://www.theverge.com/").then(function(res) {
         var $ = cheerio.load(res.data);
-        $("").each(function(i, element) {
+        $("div h2").each(function(i, element) {
             var result = {};
 
             result.title = $(this)
@@ -44,7 +44,37 @@ app.get("/scrape", function(req, res) {
     });
 });
 
+app.get("/articles", function(req, res) {
+    db.Article.find({}).then(function(dbArticle) {
+        res.json(dbArticle);
+    })
+    .catch(function(err) {
+        res.json(err);
+    });
+});
+
+app.get("/articles/:id", function(req, res) {
+    db.Article.findOne({ _id: req.params.id }).populate("note").then(function(dbArticle) {
+        res.json(dbArticle);
+    })
+    .catch(function(err) {
+        res.json(err);
+    });
+});
+
+app.post("/articles/:id", function(req, res) {
+    db.Note.create(req.body).then(function(dbNote) {
+        return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+    })
+    .then(function(dbArticle) {
+        res.json(dbArticle);
+    })
+    .catch(function(err) {
+        res.json(err);
+    });
+});
+
 // Server Start
 app.listen(PORT, function() {
-    console.log("Server listening on: http://localhost:" + PORT + "!")
-})
+    console.log("Server listening on: http://localhost:" + PORT + "!");
+});
