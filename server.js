@@ -28,10 +28,9 @@ app.get("/scrape", function(req, res) {
         $("div h2").each(function(i, element) {
             var result = {};
 
-            result.title = $(this)
-            .children("a").text();
-            result.line = $(this)
-            .children("a").attr("href");
+            result.title = $(this).children("div").children("div").children("h2").children("a").text();
+            result.link = $(this).children("div").children("div").children("h2").children("a").attr("href");
+            result.img = $(this).children("div").children("a").children("div").children("noscript").text();
 
             db.Article.create(result).then(function(dbArticle) {
                 console.log(dbArticle);
