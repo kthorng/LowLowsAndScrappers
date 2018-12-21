@@ -12,6 +12,8 @@ var PORT = 8080;
 var app = express();
 
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+// var MONGODB_URI = "mongodb://localhost/mongoHeadlines", { useNewUrlParser: true });
+
 
 app.use(logger("dev"));
 
@@ -20,16 +22,16 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect(MONGODB_URI);
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 app.get("/scrape", function(req, res) {
-    axios.get("https://www.theverge.com/").then(function(res) {
-        var $ = cheerio.load(res.data);
-        $("div h2").each(function(i, element) {
+    axios.get("https://www.theverge.com/").then(function(response) {
+        var $ = cheerio.load(response.data);
+        $("div.c-compact-river__entry ").each(function(i, element) {
             var result = {};
 
             result.title = $(this).children("div").children("div").children("h2").children("a").text();
-            result.link = $(this).children("div").children("div").children("h2").children("a").attr("href");
+            result.link = $(this).children("div").children("div").children("h2").children("a").attr("href")
             result.img = $(this).children("div").children("a").children("div").children("noscript").text();
 
             db.Article.create(result).then(function(dbArticle) {
